@@ -2,3 +2,5 @@
 tmp/
 !tmp/.gitkeep
 vault_password
+.idea
+.vagrant
