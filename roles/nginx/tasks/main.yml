@@ -2,6 +2,7 @@
 - name: Ensure nginx ppa is used for newer nginx versions
   apt_repository:
     repo: ppa:nginx/stable
+  register: nginx_repo
 
 - name: Ensure nginx from ppa is pinned
   copy:
@@ -11,12 +12,17 @@
       Pin-Priority: 1000
     dest: /etc/apt/preferences.d/ppa-nginx
     mode: 0755
+  register: nginx_ppa_pin
 
 - name: Ensure apt cache gets updated
   apt:
     update_cache: yes
-    cache_valid_time: 3600
   when: nginx_repo.changed or nginx_ppa_pin.changed
+
+- name: Ensure apt cache is updated
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
 
 - name: Ensure nginx installed and current version
   apt:
