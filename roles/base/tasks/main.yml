@@ -43,9 +43,8 @@
 
 - name: Ensure clean motd
   file:
-    path: '/etc/update-motd.d/{{item}}'
-    # only removing executable rights would be cleaner, but they are gone now
-    state: absent
+    dest: '/etc/update-motd.d/{{item}}'
+    mode: a-x
   with_items:
     - 10-help-text
     - 50-motd-news
@@ -64,7 +63,7 @@
       #!/bin/sh
       printf "\n"
       printf "This system is managed with ansible, see following repository for details\n"
-      printf "https://github.com/stadtulm/a13-ansible\n"
+      printf "https://github.com/ORI-s-Source/bigbluebutton\n"
       printf "\n"
     mode: 0755
     dest: /etc/update-motd.d/11-help-text
