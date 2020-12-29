@@ -38,6 +38,7 @@
       - sudo
       - htop
       - vim
+      - nano
     state: present
 
 - name: Ensure clean motd
