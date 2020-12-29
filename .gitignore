@@ -4,3 +4,4 @@ tmp/
 vault_password
 .idea
 .vagrant
+.DS_Store
