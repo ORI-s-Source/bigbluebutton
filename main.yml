@@ -31,17 +31,6 @@
     - cloudalchemy.node-exporter
     - node-exporter-ufw
 
-- name: DNS Server
-  hosts: dns
-  become: yes
-  tags:
-    - dns
-  vars:
-    coredns_config_file: files/coredns/Corefile.j2
-  roles:
-    - cloudalchemy.coredns
-    - coredns-ufw
-
 - name: TURN Server
   hosts: turn
   become: yes
