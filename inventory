@@ -17,23 +17,16 @@ bbb2.ori.schuledigital.test
 # The disabled bbb servers
 [bbb_tok]
 
-
-[loadbalancer]
+[scalelite]
 bbb.ori.schuledigital.test nginx_domain_name="bbb.ori.schuledigital.test"
 
 [monitoring]
 bbb.ori.schuledigital.test mon_hostname="mon.bbb.ori.schuledigital.test"
 
-[frontend]
+[greenlight]
 bbb.ori.schuledigital.test gl_domain_name="bbb.ori.schuledigital.test"
 
-[backupstorage]
 
 [turn]
 bbb1.ori.schuledigital.test turn_hostname="turn1.ori.schuledigital.test" turn_ipv4="172.16.16.111" turn_ipv6=""
 bbb2.ori.schuledigital.test turn_hostname="turn2.ori.schuledigital.test" turn_ipv4="172.16.16.112" turn_ipv6=""
-
-[support]
-
-#[all:vars]
-#ansible_user=vagrant
