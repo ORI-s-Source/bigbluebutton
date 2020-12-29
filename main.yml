@@ -39,7 +39,7 @@
   vars_files:
     - vars.yml
   roles:
-    - turn-standalone
+    - turn
 
 - name: BigBlueButton
   hosts: bbb
