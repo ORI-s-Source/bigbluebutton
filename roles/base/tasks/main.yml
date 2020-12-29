@@ -43,8 +43,8 @@
 
 - name: Ensure clean motd
   file:
-    dest: '/etc/update-motd.d/{{item}}'
-    mode: a-x
+    path: '/etc/update-motd.d/{{item}}'
+    state: absent
   with_items:
     - 10-help-text
     - 50-motd-news
