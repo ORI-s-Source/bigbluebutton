@@ -10,8 +10,8 @@ tls-listening-port=443
 # addresses coturn is using. Do that by setting this option (it can be
 # specified multiple times). The default is to listen on all addresses.
 # You do not normally need to set this option.
-listening-ip={{ ansible_default_ipv4.address }}
-listening-ip={{ ansible_default_ipv6.address }}
+listening-ip={{ turn_ipv4 }}
+listening-ip={{ turn_ipv6 }}
 
 # If the server is behind NAT, you need to specify the external IP address.
 # If there is only one external address, specify it like this:
