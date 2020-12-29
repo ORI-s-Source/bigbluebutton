@@ -1,0 +1,30 @@
+server {
+{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:80 default_server;{% endif %}
+{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:80 default_server;{% endif %}
+    server_name {{ nginx_domain }}{% for alias in nginx_alias %} {{ alias }}{% endfor %};
+
+    location /.well-known/acme-challenge {
+        root /var/www/letsencrypt;
+        try_files $uri $uri/ =404;
+    }
+
+{% if not no_https %}
+    location / {
+        rewrite ^ https://{{ nginx_domain }}$request_uri? permanent;
+    }
+{% else %}
+
+{% if maintenance %}
+    if ($remote_addr != 127.0.0.1) {
+        return 503;
+    }
+{% endif %}
+    error_page 503 @maintenance;
+    location @maintenance {
+        rewrite ^(.*)hackhack.gif$ /maintenance/hackhack.gif break;
+        rewrite ^(.*)$ /maintenance/index.html break;
+    }
+
+    include /etc/nginx/{{ nginx_config_name }}.d/*.conf;
+{% endif %}
+}

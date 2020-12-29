@@ -1,0 +1,62 @@
+---
+- name: Add certbot apt repo
+  apt_repository:
+    repo: ppa:certbot/certbot
+    state: present
+  register: certbot_apt_repo
+
+- name: Update cache
+  apt:
+    update_cache: true
+  when: certbot_apt_repo.changed
+
+- name: Install certbot
+  apt:
+    pkg:
+      - certbot
+      - python3-certbot-nginx
+    update_cache: true
+    cache_valid_time: 3600
+    state: present
+
+- name: Ensure Let's Encrypt uses the right server
+  lineinfile:
+    path: /etc/letsencrypt/cli.ini
+    regexp: '^server'
+    line: 'server = {{ acme_sever }}'
+
+- name: Register certbot certificate file
+  stat:
+    path: "/etc/letsencrypt/live/{{ nginx_domain }}/fullchain.pem"
+  register: certbot_certificate_file_path
+
+- name: Ensure folder for letsencrypt exists
+  file:
+    name: /var/www/letsencrypt
+    state: directory
+
+- name: Generate Certificates
+  command: certbot certonly --webroot --webroot-path /var/www/letsencrypt -d {{ nginx_domain }}{% for alias in nginx_alias %} -d {{ alias }}{% endfor %} --agree-tos --email {{ letsencrypt_email }} -n
+  notify: reload nginx
+  when: not certbot_certificate_file_path.stat.exists
+
+- name: Generate dhparams
+  shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
+  args:
+    creates: /etc/nginx/dhparams.pem
+
+- name: Ensure https config exists
+  template:
+    src: https.conf.j2
+    dest: "/etc/nginx/sites-available/{{ nginx_config_name }}-https.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload nginx
+
+- name: Ensure https config is applied
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/{{ nginx_config_name }}-https.conf"
+    dest: "/etc/nginx/sites-enabled/{{ nginx_config_name }}-https.conf"
+  notify: reload nginx
