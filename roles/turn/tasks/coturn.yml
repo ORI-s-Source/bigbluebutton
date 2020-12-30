@@ -10,19 +10,6 @@
     src: "coturn.service"
     dest: /etc/systemd/system/coturn.service
 
-- name: Ensure coturn is in ssl-cert group
-  user:
-    name: turnserver
-    groups: ssl-cert
-    append: yes
-    state: present
-
-- name: Enable coturn
-  systemd:
-    daemon_reload: yes
-    name: coturn
-    enabled: yes
-
 - name: Copy coturn config-file
   template:
     src: "turnserver.conf.j2"
@@ -40,6 +27,7 @@
   systemd:
     name: coturn
     state: started
+    enabled: true
 
 - name: Ensure coturn is restarted everyday @ 4 am
   cron:

@@ -38,7 +38,14 @@
     - turn
   vars_files:
     - vars.yml
+  vars:
+    nginx_ipv4: "{{ turn_ipv4 }}"
+    nginx_ipv6: "{{ turn_ipv6 }}"
+    nginx_config_name: "turn"
+    nginx_domain: "{{ turn_hostname }}"
+    no_https: true
   roles:
+    - nginx
     - turn
 
 - name: BigBlueButton
