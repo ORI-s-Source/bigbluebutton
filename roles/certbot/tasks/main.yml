@@ -1,0 +1,26 @@
+---
+- name: Add certbot apt repo
+  apt_repository:
+    repo: ppa:certbot/certbot
+    state: present
+  register: certbot_apt_repo
+
+- name: Update cache
+  apt:
+    update_cache: true
+  when: certbot_apt_repo.changed
+
+- name: Install certbot
+  apt:
+    pkg:
+      - certbot
+      - python3-certbot-nginx
+    update_cache: true
+    cache_valid_time: 3600
+    state: present
+
+- name: Ensure Let's Encrypt uses the right server
+  lineinfile:
+    path: /etc/letsencrypt/cli.ini
+    regexp: '^server'
+    line: 'server = {{ acme_sever }}'
