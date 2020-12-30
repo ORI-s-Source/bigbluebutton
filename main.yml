@@ -56,23 +56,14 @@
   vars_files:
     - vars.yml
   vars:
-    bbb_letsencrypt_enable: yes
-    bbb_letsencrypt_email: "{{ letsencrypt_email }}"
-    bbb_coturn_enable: no
-    bbb_turn_enable: yes
-    bbb_stun_servers:
-      - server: "{{ bbb_turn_server }}:3478"
-    bbb_turn_servers:
-      - server: "{{ bbb_turn_server }}"
-        port: 443
-        secret: "{{ turn_secret }}"
-        tls: true
-    bbb_greenlight_enable: no
-    bbb_api_demos_enable: no
+    nginx_ipv4: "{{ web_ipv4 }}"
+    nginx_ipv6: "{{ web_ipv6 }}"
+    nginx_config_name: "main-ip"
+    nginx_domain: "{{ inventory_hostname }}"
+    no_https: false
   roles:
     - nginx
-    - n0emis.bigbluebutton
-    - bbb-ulmlernt
+    - bbb-ori
 
 - name: BBB Exporter
   hosts: bbb
