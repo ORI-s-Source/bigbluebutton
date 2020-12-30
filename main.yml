@@ -61,16 +61,12 @@
     bbb_coturn_enable: no
     bbb_turn_enable: yes
     bbb_stun_servers:
-      - server: "{{ bbb_additional_turn_server }}:3478"
+      - server: "{{ bbb_turn_server }}:3478"
     bbb_turn_servers:
-      - server: "{{ bbb_additional_turn_server }}"
+      - server: "{{ bbb_turn_server }}"
         port: 443
         secret: "{{ turn_secret }}"
         tls: true
-      - server: "{{ bbb_additional_turn_server }}"
-        port: 3478
-        secret: "{{ turn_secret }}"
-        tls: false
     bbb_greenlight_enable: no
     bbb_api_demos_enable: no
   roles:

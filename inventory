@@ -6,8 +6,8 @@ bbb2.ori.schuledigital.test ansible_host=172.16.16.102 web_ipv4="172.16.16.102" 
 [dns]
 
 [bbb]
-bbb1.ori.schuledigital.test bbb_additional_turn_server="turn1.ori.schuledigital.test"
-bbb2.ori.schuledigital.test bbb_additional_turn_server="turn2.ori.schuledigital.test"
+bbb1.ori.schuledigital.test bbb_turn_server="turn1.ori.schuledigital.test"
+bbb2.ori.schuledigital.test bbb_turn_server="turn2.ori.schuledigital.test"
 
 # The enabled bbb servers
 [bbb_tik]
