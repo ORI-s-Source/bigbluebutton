@@ -1,0 +1,32 @@
+[all]
+bbb.ori.schuledigital.test ansible_host=172.16.16.100 web_ipv4="172.16.16.100" web_ipv6=""
+bbb1.ori.schuledigital.test ansible_host=172.16.16.101 web_ipv4="172.16.16.101" web_ipv6=""
+bbb2.ori.schuledigital.test ansible_host=172.16.16.102 web_ipv4="172.16.16.102" web_ipv6=""
+
+[dns]
+
+[bbb]
+bbb1.ori.schuledigital.test bbb_turn_server="turn1.ori.schuledigital.test"
+bbb2.ori.schuledigital.test bbb_turn_server="turn2.ori.schuledigital.test"
+
+# The enabled bbb servers
+[bbb_tik]
+bbb1.ori.schuledigital.test
+bbb2.ori.schuledigital.test
+
+# The disabled bbb servers
+[bbb_tok]
+
+[scalelite]
+bbb.ori.schuledigital.test nginx_domain_name="bbb.ori.schuledigital.test"
+
+[monitoring]
+bbb.ori.schuledigital.test mon_hostname="mon.bbb.ori.schuledigital.test"
+
+[greenlight]
+bbb.ori.schuledigital.test gl_domain_name="bbb.ori.schuledigital.test"
+
+
+[turn]
+bbb1.ori.schuledigital.test turn_hostname="turn1.ori.schuledigital.test" turn_ipv4="172.16.16.111" turn_ipv6=""
+bbb2.ori.schuledigital.test turn_hostname="turn2.ori.schuledigital.test" turn_ipv4="172.16.16.112" turn_ipv6=""
