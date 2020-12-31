@@ -10,8 +10,8 @@ greenlight_mail:
 
 acme_sever: https://acme-v02.api.letsencrypt.org/directory
 
-frontend_url: "https://bbb.ori.schuledigital.test"
-monitoring_host: "mon.bbb.ori.schuledigital.test"
+frontend_url: "https://bbb.ori.schuledigital.com"
+monitoring_host: "mon.bbb.ori.schuledigital.com"
 
 greenlight_mail_password: !vault |
   $ANSIBLE_VAULT;1.1;AES256
@@ -52,7 +52,7 @@ greenlight_postgres_password: !vault |
   64363034306338323431613436643462653432383066373963623534353630393336396630643337
   633263353431313661366134653139643630
 
-scalelite_loadbalancer_url: "https://bbb.ori.schuledigital.test/bigbluebutton/"
+scalelite_loadbalancer_url: "https://{{ frontend_url }}/lb/bigbluebutton/"
 scalelite_loadbalancer_secret: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   65643965613239366233393333666361623532366365633034326232366561343930373632306235
