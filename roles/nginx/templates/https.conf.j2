@@ -1,6 +1,8 @@
 server {
-{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:443 ssl http2;{% endif %}
-{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:443 ssl http2;{% endif %}
+{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:443 ssl http2;
+{% endif %}
+{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:443 ssl http2;
+{% endif %}
     server_name {{ nginx_domain }}{% for alias in nginx_alias %} {{ alias }}{% endfor %};
 
     ssl_certificate         /etc/letsencrypt/live/{{ nginx_domain }}/fullchain.pem;

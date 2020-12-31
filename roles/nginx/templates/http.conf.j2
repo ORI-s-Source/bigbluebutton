@@ -1,6 +1,8 @@
 server {
-{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:80 default_server;{% endif %}
-{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:80 default_server;{% endif %}
+{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:80 default_server;
+{% endif %}
+{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:80 default_server;
+{% endif %}
     server_name {{ nginx_domain }}{% for alias in nginx_alias %} {{ alias }}{% endfor %};
 
     location /.well-known/acme-challenge {

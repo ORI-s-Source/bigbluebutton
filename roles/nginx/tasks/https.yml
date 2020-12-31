@@ -3,21 +3,24 @@
   stat:
     path: "/etc/letsencrypt/live/{{ nginx_domain }}/fullchain.pem"
   register: certbot_certificate_file_path
+  when: not no_https
 
 - name: Ensure folder for letsencrypt exists
   file:
     name: /var/www/letsencrypt
     state: directory
+  when: not no_https
 
 - name: Generate Certificates
   command: certbot certonly --webroot --webroot-path /var/www/letsencrypt -d {{ nginx_domain }}{% for alias in nginx_alias %} -d {{ alias }}{% endfor %} --agree-tos --email {{ letsencrypt_email }} -n
   notify: reload nginx
-  when: not certbot_certificate_file_path.stat.exists
+  when: not no_https and not certbot_certificate_file_path.stat.exists
 
 - name: Generate dhparams
   shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
   args:
     creates: /etc/nginx/dhparams.pem
+  when: not no_https
 
 - name: Ensure https config exists
   template:
@@ -27,6 +30,7 @@
     group: root
     mode: 0644
   notify: reload nginx
+  when: not no_https
 
 - name: Ensure https config is applied
   file:
@@ -34,3 +38,11 @@
     src: "/etc/nginx/sites-available/{{ nginx_config_name }}-https.conf"
     dest: "/etc/nginx/sites-enabled/{{ nginx_config_name }}-https.conf"
   notify: reload nginx
+  when: not no_https
+
+- name: Ensure https config is not applied
+  file:
+    state: absent
+    path: "/etc/nginx/sites-enabled/{{ nginx_config_name }}-https.conf"
+  notify: reload nginx
+  when: no_https
