@@ -131,7 +131,7 @@
     - scalelite
 
 - name: Register BBBs at Loadbalancer
-  hosts: loadbalancer
+  hosts: scalelite
   become: yes
   tags:
     - loadbalancer
