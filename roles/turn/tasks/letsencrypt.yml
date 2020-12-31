@@ -4,6 +4,11 @@
     path: "/etc/letsencrypt/live/{{ turn_hostname }}/fullchain.pem"
   register: certbot_certificate_file_path
 
+- name: Ensure folder for letsencrypt exists
+  file:
+    name: /var/www/letsencrypt
+    state: directory
+
 - name: Generate Certificates
-  command: certbot certonly -d {{ turn_hostname }} --agree-tos --email {{ letsencrypt_email }} --standalone
+  command: certbot certonly --webroot --webroot-path /var/www/letsencrypt -d {{ turn_hostname }} --agree-tos --email {{ letsencrypt_email }} -n
   when: not certbot_certificate_file_path.stat.exists
