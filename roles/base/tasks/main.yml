@@ -75,4 +75,7 @@
     state: absent
   notify: restart sshd
 
+- import_role:
+    name: pip
+
 - import_tasks: firewall.yml
