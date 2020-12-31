@@ -60,7 +60,8 @@
     nginx_ipv6: "{{ web_ipv6 }}"
     nginx_config_name: "main-ip"
     nginx_domain: "{{ inventory_hostname }}"
-    no_https: false
+    bbb_hostname: "{{ ansible_fqdn }}"
+    bbb_meteor: {}
   roles:
     - nginx
     - bbb-ori
