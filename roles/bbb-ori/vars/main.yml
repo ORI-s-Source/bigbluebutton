@@ -13,9 +13,8 @@ bbb_required_packages:
 
 bbb_and_dependencies:
   - mongodb-org
-  - bbb-check
   - bbb-html5
   - bigbluebutton
 
-bbb_apt_mirror: https://packages-eu.bigbluebutton.org
+bbb_apt_mirror: http://packages-eu.bigbluebutton.org
 bbb_apt_key: 770C4267C5E63474D171B60937B5DD5EFAB46452

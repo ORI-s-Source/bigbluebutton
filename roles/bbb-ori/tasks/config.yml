@@ -1,1 +1,248 @@
 ---
+- name: register current bbb properties
+  slurp:
+    src: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+  register: properties
+
+- name: set bbb hostname
+  command: "bbb-conf --setip {{ bbb_hostname }}"
+  become: true
+  when: properties['content'] | b64decode | regex_search(bbb_hostname, multiline=True, ignorecase=True) != bbb_hostname
+  notify: restart bigbluebutton
+
+- name: enable join via html5
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^attendeesJoinViaHTML5Client'
+    line: 'attendeesJoinViaHTML5Client=true'
+  notify: restart bigbluebutton
+
+- name: enable mod join via html5
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^moderatorsJoinViaHTML5Client'
+    line: 'moderatorsJoinViaHTML5Client=true'
+  notify: restart bigbluebutton
+
+- name: set bbb to use HTTPS
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^bigbluebutton.web.serverURL'
+    line: 'bigbluebutton.web.serverURL=https://{{ nginx_domain }}'
+  notify: restart bigbluebutton
+
+- name: disable recording
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^disableRecordingDefault'
+    line: 'disableRecordingDefault=true'
+  notify: restart bigbluebutton
+
+- name: ensure recording auto start is disabled
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^autoStartRecording'
+    line: 'autoStartRecording=false'
+  notify: restart bigbluebutton
+
+- name: disable users to start recordings
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^allowStartStopRecording'
+    line: 'allowStartStopRecording=false'
+  notify: restart bigbluebutton
+
+- name: set muteOnStart
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^muteOnStart'
+    line: 'muteOnStart=false'
+  notify: restart bigbluebutton
+
+- name: set appLogLevel
+  lineinfile:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: '^appLogLevel'
+    line: 'appLogLevel=debug'
+  notify: restart bigbluebutton
+
+- name: set red5 to use HTTPS 1/2
+  lineinfile:
+    path: /usr/share/red5/webapps/screenshare/WEB-INF/screenshare.properties
+    regexp: '^jnlpUrl'
+    line: 'jnlpUrl=https://{{ nginx_domain }}/screenshare'
+  notify: restart bigbluebutton
+
+- name: set red5 to use HTTPS 2/2
+  lineinfile:
+    path: /usr/share/red5/webapps/screenshare/WEB-INF/screenshare.properties
+    regexp: '^jnlpFile'
+    line: 'jnlpFile=https://{{ nginx_domain }}/screenshare/screenshare.jnlp'
+  notify: restart bigbluebutton
+
+- name: copy TURN config file
+  template:
+    src: bbb/turn-stun-servers.xml.j2
+    dest: /usr/share/bbb-web/WEB-INF/classes/spring/turn-stun-servers.xml
+  notify: restart bigbluebutton
+
+- name: serve recordings via https
+  lineinfile:
+    path: /usr/local/bigbluebutton/core/scripts/bigbluebutton.yml
+    regexp: "playback_protocol"
+    line: "playback_protocol: https"
+  notify: restart bigbluebutton
+
+- name: set BigBlueButton client to load components via HTTPS
+  notify: restart bigbluebutton
+  replace:
+    path: /var/www/bigbluebutton/client/conf/config.xml
+    regexp: 'http://'
+    replace: 'https://'
+
+- name: set note server to use HTTPS
+  notify: restart bigbluebutton
+  replace:
+    path: /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+    regexp: 'http://'
+    replace: 'https://'
+
+- name: set korrento server to use HTTPS
+  notify: restart bigbluebutton
+  replace:
+    path: /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+    regexp: 'ws://'
+    replace: 'wss://'
+
+- name: Read meteor
+  slurp:
+    path: /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+  register: r_meteor
+
+- name: extract config of meteor
+  set_fact:
+    meteor: "{{ r_meteor['content'] | b64decode | from_yaml }}"
+
+- name: combine meteor config
+  set_fact:
+    meteor: "{{ meteor | combine(bbb_meteor, recursive=true) }}"
+
+- name: write back new meteor config
+  notify: restart bigbluebutton
+  copy:
+    content: '{{ meteor  | to_nice_yaml }}'
+    dest: /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+
+- name: configure freeswitch to use SSL
+  lineinfile:
+    path: /etc/bigbluebutton/nginx/sip.nginx
+    regexp: "proxy_pass"
+    line: "        proxy_pass https://{{ web_ipv4 }}:7443;"
+  notify: reload nginx
+
+- name: make shure, bigbluebutton nginx vhost is not enabled
+  file:
+    path: /etc/nginx/sites-enabled/bigbluebutton
+    state: absent
+  notify: reload nginx
+
+- name: copy bbb nginx locations
+  template:
+    src: bbb/bigbluebutton.j2
+    dest: "/etc/nginx/{{ nginx_config_name }}.d/bigbluebutton.conf"
+  notify: reload nginx
+
+- name: enable CPUSchedulingPolicy in FreeSWITCH service
+  lineinfile:
+    path: /lib/systemd/system/freeswitch.service
+    regexp: '^#?CPUSchedulingPolicy=rr'
+    line: 'CPUSchedulingPolicy=rr'
+  notify:
+    - restart freeswitch
+    - reload systemd
+
+- name: enable IPv6 in FreeSWITCH service 1/2
+  command:
+    cmd: mv {{ item }}_ {{ item }}
+    creates: "{{ item }}"
+    removes: "{{ item }}_"
+  with_items:
+    - "/opt/freeswitch/etc/freeswitch/sip_profiles/internal-ipv6.xml"
+    - "/opt/freeswitch/etc/freeswitch/sip_profiles/external-ipv6.xml"
+  notify:
+    - restart freeswitch
+    - reload nginx
+
+- name: enable IPv6 in FreeSWITCH service 2/2
+  lineinfile:
+    path: /opt/freeswitch/etc/freeswitch/autoload_configs/event_socket.conf.xml
+    regexp: '<param name="listen-ip" value="[a-fA-F0-9.:]+"/>'
+    line: '<param name="listen-ip" value="::"/>'
+  notify:
+    - restart freeswitch
+    - reload nginx
+
+- name: FreeSWITCH external ip (rtp)
+  replace:
+    path: /opt/freeswitch/etc/freeswitch/vars.xml
+    regexp:  '<X-PRE-PROCESS cmd="set" data="external_rtp_ip=.*"\/>'
+    replace: '<X-PRE-PROCESS cmd="set" data="external_rtp_ip=stun:{{ turn_hostname }}:3478"/>'
+  notify:
+    - restart freeswitch
+    - reload nginx
+
+- name: FreeSWITCH external ip (sip)
+  replace:
+    path: /opt/freeswitch/etc/freeswitch/vars.xml
+    regexp:  '<X-PRE-PROCESS cmd="set" data="external_sip_ip=.*"\/>'
+    replace: '<X-PRE-PROCESS cmd="set" data="external_sip_ip=stun:{{ turn_hostname }}:3478"/>'
+  notify:
+    - restart freeswitch
+    - reload nginx
+
+#from bbb-ulm
+
+- name: ensure our own default slides are used
+  copy:
+    src: default.pdf
+    dest: /var/www/bigbluebutton-default/default.pdf
+
+#- name: copy our own mute/unmute sounds
+#  copy:
+#    src: '{{ item }}'
+#    dest: '/opt/freeswitch/share/freeswitch/sounds/en/us/callie/conference/48000/{{item}}'
+#  with_items:
+#    - conf-muted-ulmlernt.wav
+#    - conf-unmuted-ulmlernt.wav
+
+#- name: ensure our own mute sound is used
+#  xml:
+#    path: /opt/freeswitch/etc/freeswitch/autoload_configs/conference.conf.xml
+#    xpath: '/configuration/profiles/profile[@name="cdquality"]/param[@name="muted-sound"]'
+#    attribute: value
+#    value: conference/conf-muted-ulmlernt.wav
+#  notify: restart bigbluebutton
+
+#- name: ensure our own unmute sound is used
+#  xml:
+#    path: /opt/freeswitch/etc/freeswitch/autoload_configs/conference.conf.xml
+#    xpath: '/configuration/profiles/profile[@name="cdquality"]/param[@name="unmuted-sound"]'
+#    attribute: value
+#    value: conference/conf-unmuted-ulmlernt.wav
+#  notify: restart bigbluebutton
+
+- name: adapt freeswitch ports in ufw
+  copy:
+    content: |
+      [freeswitch]
+      title=freeswitch
+      description=freeswitch telecom stack
+      ports=16384:32768/udp
+    mode: 0644
+    dest: /etc/ufw/applications.d/freeswitch
+
+- name: allow freeswitch in ufw
+  ufw:
+    rule: allow
+    name: freeswitch
+    state: enabled
