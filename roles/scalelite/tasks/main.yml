@@ -20,7 +20,6 @@
     version: b49c803e6db62cabed3fa49796f6e8917d222bfb
   notify: restart scalelite
 
-
 - name: Ensure scalelite is owner of /var/www/scalelite
   file:
     path: /var/www/scalelite
@@ -86,8 +85,12 @@
   template:
     src: env.j2
     dest: /var/www/scalelite/.env
-  become: yes
-  become_user: scalelite
+
+- name: Adjust owner of environment file for scalelite
+  file:
+    path: /var/www/scalelite/.env
+    owner: scalelite
+    group: scalelite
 
 - name: Ensure systemd unit for scalelite api
   template:
@@ -114,9 +117,12 @@
     - scalelite-poller
 
 - name: Count scalelite database tables
-  shell:
-    cmd: "psql -h 127.0.0.1 -U scalelite scalelite -qAt -c 'select count(*) from pg_stat_user_tables;'"
-  check_mode: no
+  community.general.postgresql_query:
+    login_host: 127.0.0.1
+    login_user: scalelite
+    login_password: "{{ scalelite_postgres_password }}"
+    query: 'select count(*) from pg_stat_user_tables;'
+    db: scalelite
   register: scalelite_database_tablecount
 
 - name: Ensure database schema is loaded
@@ -126,7 +132,7 @@
     cmd: "set -o allexport; source .env; set +o allexport; bundle exec rails db:schema:load"
   become: yes
   become_user: scalelite
-  when: scalelite_database_tablecount.stdout|int <= 1
+  when: scalelite_database_tablecount.query_result.count|int <= 1
 
 - name: Ensure scalelite-api is started
   systemd:
@@ -141,5 +147,5 @@
 - name: Ensure scalelite nginx config exists
   template:
     src: nginx-scalelite.conf
-    dest: /etc/nginx/a13.d/scalelite.conf
+    dest: "/etc/nginx/{{ nginx_config_name }}.d/scalelite.conf"
   notify: reload nginx
