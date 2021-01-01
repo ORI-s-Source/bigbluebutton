@@ -1,7 +1,7 @@
 server {
-{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:80 default_server;
+{% if nginx_ipv4 != "" %}    listen {{ nginx_ipv4 }}:80;
 {% endif %}
-{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:80 default_server;
+{% if nginx_ipv6 != "" %}    listen [{{ nginx_ipv6 }}]:80;
 {% endif %}
     server_name {{ nginx_domain }}{% for alias in nginx_alias %} {{ alias }}{% endfor %};
 
