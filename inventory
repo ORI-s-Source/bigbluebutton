@@ -1,32 +1,44 @@
 [all]
-bbb.ori.schuledigital.test ansible_host=172.16.16.100 web_ipv4="172.16.16.100" web_ipv6=""
-bbb1.ori.schuledigital.test ansible_host=172.16.16.101 web_ipv4="172.16.16.101" web_ipv6=""
-bbb2.ori.schuledigital.test ansible_host=172.16.16.102 web_ipv4="172.16.16.102" web_ipv6=""
+bbb.ori.schuledigital.com  ansible_host=93.104.210.27      web_ipv4="93.104.210.27"     web_ipv6="2a02:c205:3006:6098:0000:0000:0000:0001"
+bbb1.ori.schuledigital.com ansible_host=93.104.209.105     web_ipv4="93.104.209.105"    web_ipv6="2a02:c205:3006:6094:0000:0000:0000:0001"
+bbb2.ori.schuledigital.com ansible_host=193.200.241.221    web_ipv4="193.200.241.221"   web_ipv6="2a02:c205:3006:6097:0000:0000:0000:0001"
+bbb3.ori.schuledigital.com ansible_host=93.104.209.126     web_ipv4="93.104.209.126"    web_ipv6="2a02:c205:3006:6095:0000:0000:0000:0001"
+bbb4.ori.schuledigital.com ansible_host=193.164.131.223    web_ipv4="193.164.131.223"   web_ipv6="2a02:c205:3006:6064:0000:0000:0000:0001"
+bbb5.ori.schuledigital.com ansible_host=193.200.241.172    web_ipv4="193.200.241.172"   web_ipv6="2a02:c205:3006:6096:0000:0000:0000:0001"
 
 [dns]
 
 [bbb]
-bbb1.ori.schuledigital.test bbb_turn_server="turn1.ori.schuledigital.test"
-bbb2.ori.schuledigital.test bbb_turn_server="turn2.ori.schuledigital.test"
+bbb1.ori.schuledigital.com bbb_turn_server="turn1.ori.schuledigital.com"
+bbb2.ori.schuledigital.com bbb_turn_server="turn2.ori.schuledigital.com"
+bbb3.ori.schuledigital.com bbb_turn_server="turn3.ori.schuledigital.com"
+bbb4.ori.schuledigital.com bbb_turn_server="turn4.ori.schuledigital.com"
+bbb5.ori.schuledigital.com bbb_turn_server="turn5.ori.schuledigital.com"
 
 # The enabled bbb servers
 [bbb_tik]
-bbb1.ori.schuledigital.test
-bbb2.ori.schuledigital.test
+bbb1.ori.schuledigital.com
+bbb2.ori.schuledigital.com
+bbb3.ori.schuledigital.com
+bbb4.ori.schuledigital.com
+bbb5.ori.schuledigital.com
 
 # The disabled bbb servers
 [bbb_tok]
 
 [scalelite]
-bbb.ori.schuledigital.test nginx_domain_name="bbb.ori.schuledigital.test"
+bbb.ori.schuledigital.com nginx_domain_name="bbb.ori.schuledigital.com"
 
 [monitoring]
-bbb.ori.schuledigital.test mon_hostname="mon.bbb.ori.schuledigital.test"
+bbb.ori.schuledigital.com mon_hostname="mon.bbb.ori.schuledigital.com"
 
 [greenlight]
-bbb.ori.schuledigital.test gl_domain_name="bbb.ori.schuledigital.test"
+bbb.ori.schuledigital.com
 
 
 [turn]
-bbb1.ori.schuledigital.test turn_hostname="turn1.ori.schuledigital.test" turn_ipv4="172.16.16.111" turn_ipv6=""
-bbb2.ori.schuledigital.test turn_hostname="turn2.ori.schuledigital.test" turn_ipv4="172.16.16.112" turn_ipv6=""
+bbb1.ori.schuledigital.com turn_hostname="turn1.ori.schuledigital.com" turn_ipv4="193.200.241.70" turn_ipv6="2a02:c205:3006:6094:0000:0000:0000:0002"
+bbb2.ori.schuledigital.com turn_hostname="turn2.ori.schuledigital.com" turn_ipv4="93.104.208.32"  turn_ipv6="2a02:c205:3006:6097:0000:0000:0000:0002"
+bbb3.ori.schuledigital.com turn_hostname="turn3.ori.schuledigital.com" turn_ipv4="193.200.241.84" turn_ipv6="2a02:c205:3006:6095:0000:0000:0000:0002"
+bbb4.ori.schuledigital.com turn_hostname="turn4.ori.schuledigital.com" turn_ipv4="193.200.241.30" turn_ipv6="2a02:c205:3006:6064:0000:0000:0000:0002"
+bbb5.ori.schuledigital.com turn_hostname="turn5.ori.schuledigital.com" turn_ipv4="193.200.241.94" turn_ipv6="2a02:c205:3006:6096:0000:0000:0000:0002"
