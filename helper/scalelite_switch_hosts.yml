@@ -1,7 +1,8 @@
 ---
 - name: Deactivate hosts in scalelite
-  hosts: loadbalancer
-  become: scalelite
+  hosts: scalelite
+  become: true
+  become_user: scalelite
   vars:
     bbb_enabled: bbb_tik
     bbb_disabled: bbb_tok
