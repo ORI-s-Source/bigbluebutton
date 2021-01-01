@@ -3,3 +3,7 @@
   service:
     name: greenlight
     state: restarted
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded

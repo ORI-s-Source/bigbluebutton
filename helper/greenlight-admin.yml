@@ -1,0 +1,28 @@
+---
+- name: Make an user admin
+  hosts: greenlight
+  gather_facts: false
+  become: yes
+  tasks:
+
+    - name: get email
+      pause:
+        prompt: "Enter the email address of the user who should be admin:"
+      register: user_input
+      when: not email is defined
+
+    - name: extract email from user input
+      set_fact:
+        email: "{{ user_input.user_input }}"
+      when: not email is defined
+
+    - name: "Make user {{ email }} an admin"
+      become_user: greenlight
+      shell:
+        chdir: /var/www/greenlight
+        executable: /bin/bash
+        cmd: |
+          export $(sed -e '/^#/d' .env | xargs -0)
+          . .env
+          echo 'User.where(email: "{{ email }}").each{|user| user.update(role_id: Role.where(provider: "greenlight", name: "admin").first.id)}' | bundle exec rails console
+      register: output
