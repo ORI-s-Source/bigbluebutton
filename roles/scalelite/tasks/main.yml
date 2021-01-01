@@ -59,28 +59,6 @@
   become: yes
   become_user: scalelite
 
-- name: Generate scalelite secret key base
-  command: openssl rand -hex 64
-  register: openssl_rand64
-  check_mode: no
-  when: not scalelite_secret_key_base is defined
-
-- name: Register secret key base
-  set_fact:
-    scalelite_secret_key_base: "{{ openssl_rand64.stdout }}"
-  when: not scalelite_secret_key_base is defined
-
-- name: Generate scalelite loadbalancer secret
-  command: openssl rand -hex 32
-  register: openssl_rand32
-  check_mode: no
-  when: not scalelite_loadbalancer_secret is defined
-
-- name: Register loadbalancer secret
-  set_fact:
-    scalelite_loadbalancer_secret: "{{ openssl_rand32.stdout }}"
-  when: not scalelite_loadbalancer_secret is defined
-
 - name: Ensure environment file for scalelite
   template:
     src: env.j2
@@ -132,7 +110,7 @@
     cmd: "set -o allexport; source .env; set +o allexport; bundle exec rails db:schema:load"
   become: yes
   become_user: scalelite
-  when: scalelite_database_tablecount.query_result.count|int <= 1
+  when: scalelite_database_tablecount.query_result[0].count|int <= 1
 
 - name: Ensure scalelite-api is started
   systemd:
