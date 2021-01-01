@@ -8,6 +8,24 @@ greenlight_mail:
   { server: 'mail.ori.schuledigital.com', port: '587', domain: 'ori.schuledigital.com',
     user: 'noreply@ori.schuledigital.com', auth: 'plain', starttls: 'true', sender: 'noreply@ori.schuledigital.com' }
 
+greenlight_ldap:
+  server: "ori.schuledigital.com"
+  port: "636"
+  method: "ssl"
+  uid: "uid"
+  base: "dc=oricloud"
+  bind_dn: "cn=admin,dc=oricloud"
+  password: !vault |
+    $ANSIBLE_VAULT;1.1;AES256
+    65343065643333373961356234383530393466653562626561666439363962646561613433316564
+    3539383039636233623637343139343835653136386137650a626164396434333833636238376238
+    34383866343265373839636461396465666531616636366639643761633866376431653230646334
+    3865373131323765630a626338343666636164326335306662333537393639383337356136383734
+    35323730353431353437333539343961636331323265643036383663616634333064386661353632
+    3165383835653739303734623639353033666638356134303733
+  role_field: ""
+
+
 acme_sever: https://acme-v02.api.letsencrypt.org/directory
 
 frontend_url: "https://bbb.ori.schuledigital.com"

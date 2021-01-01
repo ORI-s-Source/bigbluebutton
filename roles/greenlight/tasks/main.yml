@@ -15,11 +15,11 @@
 
 - name: Checkout greenlight repository
   git:
-    repo: https://github.com/stadtulm/greenlight.git
+    repo: https://github.com/ORI-s-Source/greenlight #https://github.com/stadtulm/greenlight.git
     dest: /var/www/greenlight
-    version: ulmlernt
+    version: ori-bbb #ulmlernt
     force: yes
-  notify: 
+  notify:
     - restart greenlight
     - reload nginx
 
@@ -56,41 +56,22 @@
   bundler:
     state: present
     exclude_groups:
-      - development
+#      - development
       - test
     chdir: /var/www/greenlight
   become: yes
   become_user: greenlight
 
-- name: find out what the current greenlight env is
-  slurp:
-    src: /var/www/greenlight/.env
-  register: current_greenlight_env
-  ignore_errors: yes
-  when: not greenlight_key_base is defined
-
-- name: register current turn secret
-  set_fact:
-    greenlight_key_base: "{{ current_greenlight_env.content | b64decode | regex_findall('SECRET_KEY_BASE=(.+)') | first }}"
-  when: not greenlight_key_base is defined and not current_greenlight_env.failed
-
-- name: Generate greenlight secret key base
-  command: openssl rand -hex 64
-  register: openssl_rand64
-  check_mode: no
-  when: not greenlight_key_base is defined
-
-- name: Register secret key base
-  set_fact:
-    greenlight_key_base: "{{ openssl_rand64.stdout }}"
-  when: not greenlight_key_base is defined
-
 - name: Ensure environment file for greenlight
   template:
     src: env.j2
     dest: /var/www/greenlight/.env
-  become: yes
-  become_user: greenlight
+
+- name: make sure the .env is owned by greenlight
+  file:
+    path: /var/www/greenlight/.env
+    owner: greenlight
+    group: greenlight
 
 - name: Ensure systemd unit for greenlight
   template:
@@ -111,5 +92,5 @@
 - name: Ensure greenlight nginx config exists
   template:
     src: nginx-greenlight.conf.j2
-    dest: /etc/nginx/a13.d/greenlight.conf
+    dest: /etc/nginx/{{ nginx_config_name }}.d/greenlight.conf
   notify: reload nginx
