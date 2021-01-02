@@ -146,6 +146,8 @@
     nginx_ipv6: "{{ web_ipv6 }}"
     nginx_config_name: "webui"
     nginx_domain: "{{ inventory_hostname }}"
+    nginx_alias:
+      - "www.{{ inventory_hostname }}"
     lb_url: "{{ scalelite_loadbalancer_url }}"
     lb_secret: "{{ scalelite_loadbalancer_secret }}"
     redis_port: 6379
