@@ -15,9 +15,9 @@
 
 - name: Checkout greenlight repository
   git:
-    repo: https://github.com/ORI-s-Source/greenlight #https://github.com/stadtulm/greenlight.git
+    repo: https://github.com/ORI-s-Source/greenlight
     dest: /var/www/greenlight
-    version: ori-bbb #ulmlernt
+    version: release-2.7.14-2
     force: yes
   notify:
     - restart greenlight
