@@ -5,10 +5,40 @@
     update_cache: true
     state: present
 
+- name: Make shure, coturn directory exists
+  file:
+    path: /etc/coturn
+    mode: 0755
+    owner: root
+    group: root
+    state: directory
+  notify: restart coturn
+
+- name: Make shure, coturn cert directory exists
+  file:
+    path: /etc/coturn/certs
+    mode: 0700
+    owner: turnserver
+    group: turnserver
+    state: directory
+  notify: restart coturn
+
+- name: Copy existing certs
+  become_user: root
+  become: yes
+  copy:
+    remote_src: yes
+    src: "/etc/letsencrypt/live/{{ nginx_domain }}/{{ item }}"
+    dest: "/etc/coturn/certs/{{ item }}"
+  with_items:
+    - "privkey.pem"
+    - "fullchain.pem"
+
 - name: Copy systemd coturn unit
   template:
     src: "coturn.service"
     dest: /etc/systemd/system/coturn.service
+  notify: restart coturn
 
 - name: Copy coturn config-file
   template:

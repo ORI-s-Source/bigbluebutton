@@ -1,5 +1,6 @@
 ---
 - name: restart coturn
-  service:
+  systemd:
     name: coturn
     state: restarted
+    daemon_reload: yes

@@ -35,7 +35,7 @@ lt-cred-mech
 # You can generate a new random value by running the command:
 #   openssl rand -hex 16
 use-auth-secret
-static-auth-secret={{ turn_secret }}
+static-auth-secret="{{ turn_secret }}"
 
 # If the realm value is unspecified, it defaults to the TURN server hostname.
 # You probably want to configure it to a domain name that you control to
@@ -44,8 +44,8 @@ realm={{ turn_hostname }}
 
 # Configure TLS support.
 # Adjust these paths to match the locations of your certificate files
-cert=/etc/letsencrypt/live/{{ turn_hostname }}/fullchain.pem
-pkey=/etc/letsencrypt/live/{{ turn_hostname }}/privkey.pem
+cert=/etc/coturn/certs/fullchain.pem
+pkey=/etc/coturn/certs/privkey.pem
 # Limit the allowed ciphers to improve security
 # Based on https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
 cipher-list="ECDH+AESGCM:ECDH+CHACHA20:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS"
