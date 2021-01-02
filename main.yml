@@ -101,15 +101,9 @@
       - name: scalelite
         state: present
         password: "{{ scalelite_postgres_password }}"
-      - name: grafana
-        state: present
-        password: "{{ monitoring_grafana_postgres_password }}"
     postgresql_databases:
       - name: scalelite
         owner: scalelite
-        state: present
-      - name: grafana
-        owner: grafana
         state: present
   pre_tasks:
     # needed for geerlingguy.postgresql
@@ -196,14 +190,17 @@
     - greenlight
 
 - name: Monitoring
-  hosts: loadbalancer
+  hosts: monitoring
   become: yes
   tags:
     - monitoring
   vars_files:
     - vars.yml
   vars:
-    nginx_domain_name: mon.ulmlernt.org
+    nginx_ipv4: "{{ web_ipv4 }}"
+    nginx_ipv6: "{{ web_ipv6 }}"
+    nginx_config_name: "monitoring"
+    nginx_domain: "{{ mon_hostname }}"
     prometheus_targets:
       node:
       - targets:
@@ -244,14 +241,14 @@
             replacement:   '$1'
     grafana_address: 127.0.0.1
     grafana_port: 3001
-    grafana_url: "https://mon.ulmlernt.org"
-    grafana_domain: "mon.ulmlernt.org"
+    grafana_url: "https://{{ mon_hostname }}"
+    grafana_domain: "{{ mon_hostname }}"
     grafana_database:
       type: postgres
       host: 127.0.0.1:5432
       name: grafana
       user: grafana
-      password: trust
+      password: "{{ monitoring_grafana_postgres_password }}"
     grafana_datasources:
       - name: prometheus
         type: prometheus
@@ -261,33 +258,51 @@
         isDefault: true
     grafana_dashboards_dir: files/grafana/dashboards
     grafana_security:
-      admin_user: admin
-      admin_password: "{{ monitoring_grafana_admin_password }}"
+      admin_user: admin@ori.schuledigital.com
+      admin_password: '{{ monitoring_grafana_admin_password }}'
     grafana_users:
       allow_sign_up: false
       default_theme: dark
       auto_assign_org: true
       editors_can_admin: true
       auto_assign_org_role: Editor
+      org_name: ORI
     grafana_auth:
-      disable_login_form: true
+      disable_login_form: yes
       anonymous:
         enabled: true
-        org_name: ulmlernt
+        org_name: ORI
         org_role: Viewer
-      github:
+      generic_oauth:
         enabled: true
+        name: ORI-Cloud
         allow_sign_up: true
-        client_id: "{{ monitoring_github_client_id }}"
-        client_secret: "{{ monitoring_github_client_secret }}"
+        client_id: "{{ monitoring_client_id }}"
+        client_secret: "{{ monitoring_client_secret }}"
         scopes: user:email,read:org
-        auth_url: https://github.com/login/oauth/authorize
-        token_url: https://github.com/login/oauth/access_token
-        api_url: https://api.github.com/user
-        team_ids: ""
-        allowed_organizations: stadtulm
+        auth_url: https://ori.schuledigital.com/index.php/apps/oauth2/authorize
+        token_url: https://ori.schuledigital.com/index.php/apps/oauth2/api/v1/token
+        api_url: https://ori.schuledigital.com/ocs/v2.php/cloud/user?format=json
+        email_attribute_path: ocs.data.email
+        role_attribute_path: contains(ocs.data.groups[*], 'admin') && 'Admin' || 'Viewer'
+    postgresql_hba_entries:
+      - { type: local, database: all, user: postgres, auth_method: peer }
+      - { type: local, database: all, user: all, auth_method: peer }
+      - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: md5 }
+      - { type: host, database: all, user: all, address: '::1/128', auth_method: md5 }
+    postgresql_users:
+      - name: grafana
+        state: present
+        password: "{{ monitoring_grafana_postgres_password }}"
+    postgresql_databases:
+      - name: grafana
+        owner: grafana
+        state: present
   roles:
+    - role: geerlingguy.postgresql
+      become: yes
     - cloudalchemy.prometheus
     - prometheus-ufw
     - cloudalchemy.grafana
-    - nginx-tls-monitoring
+    - nginx
+    - grafana

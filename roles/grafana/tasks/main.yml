@@ -1,0 +1,6 @@
+---
+- name: Ensure gafana nginx config exists
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/{{ nginx_config_name }}.d/gafana.conf
+  notify: reload nginx
