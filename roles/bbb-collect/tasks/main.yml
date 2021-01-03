@@ -3,6 +3,7 @@
   command: bbb-conf --secret
   register: bbb_conf_result
   check_mode: no
+  changed_when: False
 
 - name: Extract bbb url
   set_fact:

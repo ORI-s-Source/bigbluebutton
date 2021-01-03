@@ -200,7 +200,7 @@
     - restart freeswitch
     - reload nginx
 
-#from bbb-ulm
+#from bbb-ulmlernt
 
 - name: ensure our own default slides are used
   copy:
