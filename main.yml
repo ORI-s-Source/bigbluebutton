@@ -23,6 +23,8 @@
 - name: Monitored host
   hosts: all
   become: yes
+  tags:
+    - monitoring
   vars:
     _node_exporter_binary_install_dir: '/opt/node_exporter'
     _node_exporter_system_group: 'prometheus'
@@ -30,6 +32,8 @@
   roles:
     - cloudalchemy.node-exporter
     - node-exporter-ufw
+    - cloudalchemy.process_exporter
+    - process-exporter-ufw
 
 - name: TURN Server
   hosts: turn
@@ -207,6 +211,9 @@
       node:
       - targets:
           "{{ groups['all'] | map('extract', hostvars, ['ansible_fqdn']) | map('regex_replace', '$', ':9100') | list }}"
+      process:
+      - targets:
+          "{{ groups['all'] | map('extract', hostvars, ['ansible_fqdn']) | map('regex_replace', '$', ':9256') | list }}"
       bbb:
       - targets:
           "{{ groups['bbb'] | map('extract', hostvars, ['ansible_fqdn']) | map('regex_replace', '$', ':9688') | list }}"
@@ -226,6 +233,16 @@
             regex:         '(.*):.*'
             target_label:  'instance'
             replacement:   '$1'
+      - job_name: "process"
+        file_sd_configs:
+          - files:
+              - "/etc/prometheus/file_sd/process.yml"
+        relabel_configs:
+          - source_labels: [ '__address__' ]
+            separator: ':'
+            regex: '(.*):.*'
+            target_label: 'instance'
+            replacement: '$1'
       - job_name: "bbb"
         file_sd_configs:
           - files:

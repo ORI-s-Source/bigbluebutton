@@ -14,3 +14,5 @@ roles:
     version: 2.15.0
   - name: cloudalchemy.grafana
     version: 0.17.0
+  - name: cloudalchemy.process_exporter
+    version: 0.2.0

@@ -1,0 +1,16 @@
+---
+- name: Ensure process-exporter config for ufw
+  copy:
+    content: |
+      [process-exporter]
+      title=process-exporter
+      description=prometheus process exporter
+      ports=9256/tcp
+    mode: 0644
+    dest: /etc/ufw/applications.d/process-exporter
+
+- name: allow process-exporter in ufw
+  ufw:
+    rule: allow
+    name: process-exporter
+    state: enabled
