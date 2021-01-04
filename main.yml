@@ -282,6 +282,17 @@
         api_url: https://ori.schuledigital.com/ocs/v2.php/cloud/user?format=json
         email_attribute_path: ocs.data.email
         role_attribute_path: contains(ocs.data.groups[*], 'admin') && 'Admin' || 'Viewer'
+    grafana_smtp:
+      enabled: true
+      host: "{{ greenlight_mail.server }}:{{ greenlight_mail.port }}"
+      user: "{{ greenlight_mail.user }}"
+      password: "{{ greenlight_mail_password }}"
+      from_address: "{{ greenlight_mail.sender }}"
+      startTLS_policy: "MandatoryStartTLS"
+    grafana_plugins:
+      - grafana-image-renderer
+    grafana_unsigned_plugins:
+      - grafana-image-renderer
     postgresql_hba_entries:
       - { type: local, database: all, user: postgres, auth_method: peer }
       - { type: local, database: all, user: all, auth_method: peer }
@@ -294,6 +305,20 @@
     postgresql_databases:
       - name: grafana
         owner: grafana
+        state: present
+  pre_tasks:
+    # needed for grafana-image-renderer
+    - name: Install dependencies for grafana-image-renderer
+      apt:
+        name:
+          - libxcomposite1
+          - libnss3
+          - libatk-bridge2.0-0
+          - libgtk-3-0
+          - libasound2
+          - libxss1
+        update_cache: yes
+        cache_valid_time: 3600
         state: present
   roles:
     - role: geerlingguy.postgresql
