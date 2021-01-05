@@ -1,0 +1,65 @@
+- name: Setup shared rooms
+  hosts: greenlight
+  gather_facts: false
+  become: yes
+  vars_files: vars/main.yml
+  tasks:
+    - name: Create Greenlight user
+      become_user: greenlight
+      shell:
+        chdir: /var/www/greenlight
+        executable: /bin/bash
+        cmd: |
+          export $(sed -e '/^#/d' .env | xargs -0)
+          . .env
+          bundler exec rake user:create["{{ name_room_owner }}","{{ email_room_owner }}","$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 128 | head -n 1)","user"]
+      register: script_res
+      no_log: true
+      changed_when: "'Account successfully created.' in script_res.stdout"
+      failed_when:
+        - "'Account successfully created.' not in script_res.stdout"
+        - "'Account with that email already exists' not in script_res.stdout"
+
+    - name: Get ID of owner
+      become_user: greenlight
+      shell:
+        chdir: /var/www/greenlight
+        executable: /bin/bash
+        cmd: |
+          export $(sed -e '/^#/d' .env | xargs -0)
+          . .env
+          echo 'User.find_by(email: "{{ email_room_owner }}").id' | bundle exec rails console
+      register: script_res
+      changed_when: false
+
+    - set_fact:
+        owner_id: "{{ script_res.stdout_lines|last }}"
+      failed_when: "{{ owner_id|int }} == 0"
+
+    - name: Create Rooms
+      become_user: greenlight
+      shell:
+        chdir: /var/www/greenlight
+        executable: /bin/bash
+        cmd: |
+          export $(sed -e '/^#/d' .env | xargs -0)
+          . .env
+          echo '{{ room_counter }}.downto(1) { |i| Room.find_by(name: "{{ room_name }}#{i}", user_id: {{ owner_id }}).nil? ? Room.create(user_id: {{ owner_id }}, name: "{{ room_name }}#{i}", room_settings: "{\"muteOnStart\":false,\"requireModeratorApproval\":false,\"anyoneCanStart\":false,\"joinModerator\":false}").name : return_value = "Room already exists" }' | bundle exec rails console
+      register: script_res
+
+    - name: Create Rooms
+      become_user: greenlight
+      shell:
+        chdir: /var/www/greenlight
+        executable: /bin/bash
+        cmd: |
+          export $(sed -e '/^#/d' .env | xargs -0)
+          . .env
+          echo 'result = ""; Room.where(user_id: {{ owner_id }}).each{ |room| result += room.name + ";" + "https://bbb.ori.schuledigital.com/" + room.uid + "\n" }; puts result;' | bundle exec rails console
+      register: script_res
+
+    - copy:
+        content: "{{script_res.stdout}}"
+        dest: out/rooms.csv
+      connection: local
+      become: false

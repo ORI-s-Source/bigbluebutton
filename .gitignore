@@ -5,3 +5,5 @@ vault_password
 .idea
 .vagrant
 .DS_Store
+helper/greenlight_rooms/out/
+!helper/greenlight_rooms/out/.gitkeep
