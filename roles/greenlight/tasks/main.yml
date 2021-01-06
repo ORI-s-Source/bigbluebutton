@@ -17,7 +17,7 @@
   git:
     repo: https://github.com/ORI-s-Source/greenlight
     dest: /var/www/greenlight
-    version: release-2.7.14-2
+    version: release-2.7.14-3
     force: yes
   notify:
     - restart greenlight
