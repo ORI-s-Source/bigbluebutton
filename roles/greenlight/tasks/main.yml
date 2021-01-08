@@ -17,11 +17,9 @@
   git:
     repo: https://github.com/ORI-s-Source/greenlight
     dest: /var/www/greenlight
-    version: release-2.7.14-3
+    version: release-2.7.14-4
     force: yes
-  notify:
-    - restart greenlight
-    - reload nginx
+  notify: restart greenlight
 
 - name: Ensure greenlight is owner of /var/www/greenlight
   file:
@@ -67,17 +65,20 @@
   template:
     src: env.j2
     dest: /var/www/greenlight/.env
+  notify: restart greenlight
 
 - name: make sure the .env is owned by greenlight
   file:
     path: /var/www/greenlight/.env
     owner: greenlight
     group: greenlight
+  notify: restart greenlight
 
 - name: Ensure systemd unit for greenlight
   template:
     src: greenlight.service
     dest: /etc/systemd/system/greenlight.service
+  notify: restart greenlight
 
 - name: Enable greenlight units
   systemd:
